@@ -1,0 +1,25 @@
+from array import array
+import time
+import sys
+import ctypes #Required for colored error messages.
+from pythonosc.dispatcher import Dispatcher
+from pythonosc import osc_server
+from threading import Lock, Thread
+
+from Controllers.DataController import Leash
+from Controllers.ThreadController import Program
+
+
+#Starts the OSC Server & andles incoming OSC data
+class Package:
+
+    #Server Start
+    def runServer(self, IP, Port):
+        try:
+            osc_server.ThreadingOSCUDPServer((IP, Port), self.__dispatcher).serve_forever()
+        except Exception as e:
+            print('\x1b[1;31;41m' + '                                                                    ' + '\x1b[0m')
+            print('\x1b[1;31;40m' + '   Warning: An application might already be running on this port!   ' + '\x1b[0m')
+            print('\x1b[1;31;41m' + '                                                                    \n' + '\x1b[0m')
+            print(e)
+            # No delay here as error message is called from the main script.
