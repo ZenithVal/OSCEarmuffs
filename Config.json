@@ -2,11 +2,11 @@
         "IP": "127.0.0.1",
         "ListeningPort": 9001,
         "SendingPort": 9000,
-        
+        "Logging": true,
+
         "InactiveUpdateInterval": 0.5,
         "ActiveUpdateInterval": 0.1,
         "RateOfChange": 0.1, 
-        "Logging": true,
 
         "MuteCurveStart": 0.1,
         "MuteCurveStop": 0.9,
@@ -14,15 +14,16 @@
         "VRCMinVolume": 0.5,
         "VRCMaxVolume": 1.0,
 
-        "LowPassEnabled": false,
-        "LowPassMax": 1.0,
+        "LowPassEnabled": false, 
+        "LowPassStrength": 1.0,
 
+        "MediaControlEnabled": true,
+        "MediaApplication": "Spotify.exe", 
+        "MediaMinVolume": 0.0,
+        "MediaMaxVolume": 1.0, 
         
-        "MultimediaEnabled": true,
-        "SpotifyMinVolume": 0.0,
-        "SpotifyMaxVolume": 0.7,
-        "SpotifyPause": true,
-        "SpotifyPauseThreshhold": 0.0,
+        "MediaPauseEnbabled": false, 
+        "MediaPauseThreshhold": 1.0, 
 
-        "AvatarParameter": "Headphones_Stretch"
+        "AvatarParameter": "Headphones_Stretch" 
 }

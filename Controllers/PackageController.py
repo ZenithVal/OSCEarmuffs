@@ -6,12 +6,34 @@ from pythonosc.dispatcher import Dispatcher
 from pythonosc import osc_server
 from threading import Lock, Thread
 
-from Controllers.DataController import Leash
+from Controllers.DataController import Earmuffs
 from Controllers.ThreadController import Program
 
 
-#Starts the OSC Server & andles incoming OSC data
+#Starts the OSC Server & handles incoming OSC data
 class Package:
+
+    def __init__(self, leashCollection):
+        self.__dispatcher = Dispatcher()
+        self.__statelock = Lock()
+        self.AvatarParameter = AvatarParameter
+        except Exception as e:
+            print(e)
+            time.sleep(5)
+
+
+    def listenAvatarParameter(self):
+            self.__dispatcher.map(f'/avatar/parameters/{Earmuffs.AvatarParameter}',self.__updateAvatarParameter, earmuffs) 
+
+    def __updateAvatarParameter(self, addr, extraArgs, value):
+        try:
+            earmuffs: Earmuffs = extraArgs[0]
+            self.__statelock.acquire()
+            earmuffs.AvatarParameterValue = value
+            self.__statelock.release()
+        except Exception as e:
+            print(e)
+            time.sleep(5)
 
     #Server Start
     def runServer(self, IP, Port):

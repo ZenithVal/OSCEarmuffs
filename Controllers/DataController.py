@@ -19,14 +19,15 @@ DefaultConfig = {
         "VRCMaxVolume": 1.0,
 
         "LowPassEnabled": False, #Requires user experience with multiple audio lines
-        "LowPassMax": 1.0,
+        "LowPassStrength": 1.0,
 
         "MediaControlEnabled": True,
         "MediaApplication": "Spotify.exe", #User can input null if they do not want it to edit spotify volume
         "MediaMinVolume": 0.0,
-        "MediaMaxVolume": 0.7,
-        "MediaPauseEnbabled": True,
-        "MediaPauseThreshhold": 0.0,
+        "MediaMaxVolume": 1.0, #Only adjust this value if you set your media application to 100% volume (Not reccomended)
+        
+        "MediaPauseEnbabled": False, #Unsure of a way to tell if the media is already paused?
+        "MediaPauseThreshhold": 1.0, #inverted~ 1.0 is actually 0% volume. 
 
         "AvatarParameter": "Headphones_Stretch" #A float on a radial menu would also work for personal control
 }
@@ -53,7 +54,7 @@ class ConfigSettings:
             self.VRCMinVolume = configJson["VRCMinVolume"]
             self.VRCMaxVolume = configJson["VRCMaxVolume"]
             self.LowPassEnabled = configJson["LowPassEnabled"]
-            self.LowPassMax = configJson["LowPassMax"]
+            self.LowPassStrength = configJson["LowPassStrength"]
 
             self.MediaControlEnabled = configJson["MediaControlEnabled"]
             self.MediaApplication = configJson["MediaApplication"]
@@ -79,7 +80,7 @@ class ConfigSettings:
             self.VRCMinVolume = DefaultConfig["VRCMinVolume"]
             self.VRCMaxVolume = DefaultConfig["VRCMaxVolume"]
             self.LowPassEnabled = DefaultConfig["LowPassEnabled"]
-            self.LowPassMax = DefaultConfig["LowPassMax"]
+            self.LowPassStrength = DefaultConfig["LowPassStrength"]
 
             self.MediaControlEnabled = DefaultConfig["MediaControlEnabled"]
             self.MediaApplication = DefaultConfig["MediaApplication"]
@@ -88,6 +89,12 @@ class ConfigSettings:
             self.MediaPauseEnabled = DefaultConfig["MediaPauseEnbabled"]
             self.MediaPauseThreshhold = DefaultConfig["MediaPauseThreshhold"]
             time.sleep(3)
+
+    def addVoiceMeterControls(self,Gain,EQgain1,EQgain2,EQgain3):
+        self.Gain = Gain
+        self.EQgain1 = EQgain1
+        self.EQgain2 = EQgain2
+        self.EQgain3 = EQgain3     
 
     def printInfo(self):        
         print('\x1b[1;32;40m' + 'OSCEarmuffs is Running!' + '\x1b[0m')
@@ -109,7 +116,7 @@ class ConfigSettings:
         print("VRC max Volume: {:.0f}".format(self.VRCMaxVolume*100)+"%")
 
         if self.LowPassEnabled:
-            print("LowPass is enabled with a maximum of {:.0f}".format(self.LowPassMax*100)+"%")
+            print("LowPass is enabled with a maximum of {:.0f}".format(self.LowPassStrength*100)+"%")
 
         if self.MediaControlEnabled:
             print(f"Media Control is enabled: \n\t Looking for {self.MediaApplication}\n\tMin volume of {self.MediaMinVolume*100}%\n\tMax volume of {self.MediaMaxVolume*100}%")

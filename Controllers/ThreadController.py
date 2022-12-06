@@ -5,7 +5,7 @@ import time
 import os
 import ctypes #Required for colored error messages.
 
-from Controllers.DataController import ConfigSettings, earmuffs
+from Controllers.DataController import ConfigSettings, Earmuffs
 
 class Program:
 
@@ -18,7 +18,7 @@ class Program:
     def updateProgram(self, runBool:bool, countValue:int):
         Program.__running = runBool
 
-    def earmuffsRun(self, earmuffs: earmuffs, counter:int = 0):
+    def earmuffsRun(self, earmuffs: Earmuffs, counter:int = 0):
 
         if counter == 0 and Program.__running or not earmuffs.Active:
             return
@@ -35,15 +35,35 @@ class Program:
             earmuffs.printOutputs()
         print("\nCurrent Status:\n")
 
-        #Volume Math
+        AvatarParameterValue = # aaa how we get the value?
 
-        #VRCHat Volume Outputs
+        #VRCHat Volume Controls
+        vrcVol = earmuffs.AvatarParameterValue -1
 
-        #Media Volume Outputs
+        #Media Volume Controls
+        if earmuffs.settings.MediaControlEnabled:
+            mediaVol = earmuffs.AvatarParameterValue
+
+            if earmuffs.settings.MediaPauseEnabled:
+                if earmuffs.AvatarParamaterValue >= earmuffs.settings.MediaPauseThreshhold:
+                    mediaPause = True
+                else:
+                    mediaPause = False
+        else:
+            mediaVol = 1.0
+            mediaPause = False
 
         #LowPass Outputs
+        if earmuffs.settings.LowPassEnabled:
+            vmGain = earmuffs.AvatarParameterValue * -8 * earmuffs.settings.LowPassStrength
+            vmBass = earmuffs.AvatarParameterValue * 12 * earmuffs.settings.LowPassStrength
+            vmHighs = earmuffs.AvatarParameterValue * -12 * earmuffs.settings.LowPassStrength
+        else:
+            vmGain=vmBass=vmHighs = 0.0
 
-    def earmuffsOutput(self, vrcVol: float, mediaVol: float, mediaPause: bool, lowpassPerc: float, settings: ConfigSettings):
+        self.earmuffsOutput(vrcVol, mediaVol, mediaPause, 0, vmGain, vmBass, vmHighs, earmuffs.settings)
+
+    def earmuffsOutput(self, vrcVol: float, mediaVol: float, mediaPause: bool, vmGain: float, vmBass: float, vmHighs: float, settings: ConfigSettings):
 
         sessions = AudioUtilities.GetAllSessions()
         for session in sessions:
@@ -52,22 +72,29 @@ class Program:
             if session.Process and session.Process.name() == "VRChat.exe":
                 volume.SetMasterVolume(vrcVol, None)
             
+            #VRC Earmuff Controls
+                #Blank functionaly for now https://github.com/vrchat-community/osc/issues/149
+
             #Media Volume
             if  ( 
-                earmuffs.settings.MediaControlEnabled 
+                settings.MediaControlEnabled 
                 and session.Process 
-                and session.Process.name() == earmuffs.settings.MediaApplication
+                and session.Process.name() == settings.MediaApplication 
                 ):
                     volume.SetMasterVolume(mediaVol, None)
 
-        #if earmuffs.settings.LowPassEnabled:
-            #Control Voicemeter lowpass here, woah.
-        
+            #Voicemeter LowPass Numbers
+            if settings.LowPassEnabled:
+                settings.Gain = vmGain 
+                settings.EQgain1 = vmBass
+                settings.EQgain2 = settings.EQgain3 = vmHighs
+
+
     def clamp (self, n):
         return max(-1.0, min(n, 1.0))
 
     def clampPos (self, n):
-        return max(0.0, min(n, 0.99999))
+        return max(0.0, min(n, 1.0))
 
     def clampNeg (self, n):
         return max(-0.99999, min(n, 0.0))

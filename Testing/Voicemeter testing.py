@@ -1,53 +1,13 @@
-# import voicemeeterlib as vm
+import voicemeeter
 
-# def main():
-#     with voicemeeterlib.api(kind_id) as vm:
+# Can be 'basic', 'banana' or 'potato'
+kind = 'basic'
 
-#         # set many parameters at once
-#         vm.apply(
-#             {
-#                 "strip-2": {"A1": True, "B1": True, "gain": -6.0},
-#             }
-#         )
+# Ensure that Voicemeeter is launched
+voicemeeter.launch(kind)
 
-# if __name__ == "__main__":
-#     kind_id = "basic"
-
-#     main()
-
-import voicemeeterlib
-
-
-class ManyThings:
-    def __init__(self, vm):
-        self.vm = vm
-
-    def things(self):
-        self.vm.strip[0].label = "podmic"
-        self.vm.strip[0].mute = True
-        print(
-            f"strip 0 ({self.vm.strip[0].label}) mute has been set to {self.vm.strip[0].mute}"
-        )
-
-
-def main():
-    with voicemeeterlib.api(kind_id) as vm:
-        do = ManyThings(vm)
-        do.things()
-
-        # set many parameters at once
-        vm.apply(
-            {
-                "strip-2": {"A1": True, "B1": True, "gain": -6.0},
-                "bus-2": {"mute": True},
-                "button-0": {"state": True},
-                "vban-in-0": {"on": True},
-                "vban-out-1": {"name": "streamname"},
-            }
-        )
-
-
-if __name__ == "__main__":
-    kind_id = "basic"
-
-    main()
+with voicemeeter.remote(kind) as vmr:
+    vmr.inputs[2].eqgain1 = 12.0
+    vmr.inputs[2].eqgain2 = -10.0
+    vmr.inputs[2].eqgain3 = -4.2
+    vmr.inputs[2].gain = -22.0
