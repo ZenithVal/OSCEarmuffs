@@ -24,9 +24,20 @@ def createDefaultConfigFile(configPath): # Creates a default config
 if __name__ == "__main__":
 
     #*************Setup*************#
-    program = Program()
-    program.setWindowTitle()
-    program.cls()
+    #program = Program()
+    #program.setWindowTitle()
+    #program.cls()
+
+    """
+    Steps to work on:
+    1 - setWindowTitle
+    2 - Clear
+    3 - Prepare config
+    4 - create settings object
+    5 - 
+    ? - Add voicemeter setup
+    """
+    
 
     # Test if Config file exists. Create the default if it does not.
     configRelativePath = "./config.json"
@@ -39,16 +50,18 @@ if __name__ == "__main__":
     configData = json.load(open(configRelativePath)) # Config file should be prepared at this point.
     settings = ConfigSettings(configData) # Get settings from config file
 
-    # VoiceMeter setup
-    if settings.LowPassEnabled:
-        import voicemeeter
-        voicemeeter.launch("basic")
-        with voicemeeter.remote("Basic") as vmr:
-            settings.addVoiceMeterControls(
-                vmr.inputs[2].gain,
-                vmr.inputs[2].eqgain1,
-                vmr.inputs[2].eqgain2,
-                vmr.inputs[2].eqgain3)
+
+    ############# Temporarily Commented to focus on main function #############
+    # # VoiceMeter setup
+    # if settings.LowPassEnabled:
+    #     import voicemeeter
+    #     voicemeeter.launch("basic")
+    #     with voicemeeter.remote("Basic") as vmr:
+    #         settings.addVoiceMeterControls(
+    #             vmr.inputs[2].gain,
+    #             vmr.inputs[2].eqgain1,
+    #             vmr.inputs[2].eqgain2,
+    #             vmr.inputs[2].eqgain3)
 
     try:
         # Manage data coming in
@@ -59,12 +72,13 @@ if __name__ == "__main__":
         serverThread = Thread(target=package.runServer, args=(settings.IP, settings.ListeningPort))
         serverThread.start()
         time.sleep(.1)
-        
-        #initialize input
-        if serverThread.is_alive():
-            leashes[0].Active = True
-            Thread(target=program.leashRun, args=(leashes[0],)).start()
-        else: raise Exception()
+
+        ############# Commented out due to potential removal #############
+        # #initialize input
+        # if serverThread.is_alive():
+        #     leashes[0].Active = True
+        #     Thread(target=program.leashRun, args=(leashes[0],)).start()
+        # else: raise Exception()
             
     except Exception as e:
         print(e)

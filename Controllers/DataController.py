@@ -62,6 +62,7 @@ class ConfigSettings:
             self.MediaMaxVolume = configJson["MediaMaxVolume"]
             self.MediaPauseEnabled = configJson["MediaPauseEnbabled"]
             self.MediaPauseThreshhold = configJson["MediaPauseThreshhold"]
+            self.AvatarParameter = configJson["AvatarParameter"]
         except Exception as e: 
             print('\x1b[1;31;40m' + 'Malformed config file. Loading default values.' + '\x1b[0m')
             print(e,"was the exception\n")
@@ -88,8 +89,10 @@ class ConfigSettings:
             self.MediaMaxVolume = DefaultConfig["MediaMaxVolume"]
             self.MediaPauseEnabled = DefaultConfig["MediaPauseEnbabled"]
             self.MediaPauseThreshhold = DefaultConfig["MediaPauseThreshhold"]
+            self.AvatarParameter = DefaultConfig["AvatarParameter"]
             time.sleep(3)
 
+        #Voicemeter controls
     def addVoiceMeterControls(self,Gain,EQgain1,EQgain2,EQgain3):
         self.Gain = Gain
         self.EQgain1 = EQgain1
@@ -125,23 +128,21 @@ class ConfigSettings:
 
 class Earmuffs:
 
-    def __init__(self, paraName, contacts, settings: ConfigSettings):
-        
-        self.Name: str = paraName #Where is paraName defined? I'm lost.
+    def __init__(self, settings: ConfigSettings):
+
         self.settings = settings
-
-        self.paraValue: float = 0
-
+        self.AvatarParameterValue: float = None,
         self.VRChatVolume: float = 0
 
-        if self.LowPassEnabled:
-            self.LowPassEffect: float = 0
+
+        # if self.LowPassEnabled:
+        #     self.LowPassEffect: float = 0
 
         if self.MediaEnabled:
-            self.MediaApplication: str = "Spotify.exe"
             self.MediaVolume: float = 0
-            if self.MediaPauseEnabled:
-                self.MediaPause: bool = False
+            
+            # if self.MediaPauseEnabled:
+            #     self.MediaPause: bool = False
 
     def printOutputs(self):
 

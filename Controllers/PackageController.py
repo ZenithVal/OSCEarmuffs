@@ -13,9 +13,10 @@ from Controllers.ThreadController import Program
 #Starts the OSC Server & handles incoming OSC data
 class Package:
 
-    def __init__(self, leashCollection):
+    def __init__(self, earmuffs):
         self.__dispatcher = Dispatcher()
         self.__statelock = Lock()
+
         self.AvatarParameter = AvatarParameter
         except Exception as e:
             print(e)
