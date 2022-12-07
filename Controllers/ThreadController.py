@@ -53,17 +53,27 @@ class Program:
             mediaVol = 1.0
             mediaPause = False
 
-        #LowPass Outputs
-        if earmuffs.settings.LowPassEnabled:
-            vmGain = earmuffs.AvatarParameterValue * -8 * earmuffs.settings.LowPassStrength
-            vmBass = earmuffs.AvatarParameterValue * 12 * earmuffs.settings.LowPassStrength
-            vmHighs = earmuffs.AvatarParameterValue * -12 * earmuffs.settings.LowPassStrength
-        else:
-            vmGain=vmBass=vmHighs = 0.0
+        # #LowPass Outputs
+        # if earmuffs.settings.LowPassEnabled:
+        #     vmGain = earmuffs.AvatarParameterValue * -8 * earmuffs.settings.LowPassStrength
+        #     vmBass = earmuffs.AvatarParameterValue * 12 * earmuffs.settings.LowPassStrength
+        #     vmHighs = earmuffs.AvatarParameterValue * -12 * earmuffs.settings.LowPassStrength
+        # else:
+        #     vmGain=vmBass=vmHighs = 0.0
 
-        self.earmuffsOutput(vrcVol, mediaVol, mediaPause, 0, vmGain, vmBass, vmHighs, earmuffs.settings)
+        self.earmuffsOutput (
+                            vrcVol, mediaVol, mediaPause, 0, 
+                            #vmGain, vmBass, vmHighs, 
+                            earmuffs.settings
+                            )
 
-    def earmuffsOutput(self, vrcVol: float, mediaVol: float, mediaPause: bool, vmGain: float, vmBass: float, vmHighs: float, settings: ConfigSettings):
+
+
+    def earmuffsOutput  (
+                        self, vrcVol: float, mediaVol: float, mediaPause: bool, 
+                        #vmGain: float, vmBass: float, vmHighs: float, 
+                        settings: ConfigSettings
+                        ):
 
         sessions = AudioUtilities.GetAllSessions()
         for session in sessions:
@@ -83,11 +93,11 @@ class Program:
                 ):
                     volume.SetMasterVolume(mediaVol, None)
 
-            #Voicemeter LowPass Numbers
-            if settings.LowPassEnabled:
-                settings.Gain = vmGain 
-                settings.EQgain1 = vmBass
-                settings.EQgain2 = settings.EQgain3 = vmHighs
+            # #Voicemeter LowPass Numbers
+            # if settings.LowPassEnabled:
+            #     settings.Gain = vmGain 
+            #     settings.EQgain1 = vmBass
+            #     settings.EQgain2 = settings.EQgain3 = vmHighs
 
 
     def clamp (self, n):
