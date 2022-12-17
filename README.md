@@ -79,8 +79,8 @@ For setup questions/support feel free to shoot me a DM or ask in #OSC-Talkin in 
 | InactiveUpdateInterval | App delay when idle                                            | 0.5       |
 | ActiveUpdateInterval   | App delay when active                                          | 0.05      |
 | RateOfChange           | Maximum volume percent change per active update inverval       | 0.1       |
-| MuteCurveStart         | Value at which audio change begins                             | 0.05      |
-| MuteCurveStop          | Value at which audio change ends                               | 0.95      |
+| VolumeCurveStart       | Value at which audio change begins                             | 0.05      |
+| VolumeCurveStop        | Value at which audio change ends                               | 0.95      |
 | VRCMinVolume           | Minimum volume of VRC                                          | 0.5       |
 | VRCMaxVolume           | Maximum volume of VRC                                          | 1.0       |
 | LowPassEnabled         | Enable Voicemeter basic integration for a lowpass effect       | false     |
