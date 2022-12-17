@@ -12,12 +12,14 @@ class Package:
         self.__dispatcher = Dispatcher() # Recieves information from vrc client
 
         self.earmuffs = earmuffs
-        self.__AvatarParameter = earmuffs.settings.AvatarParameter
+        self.__AvatarParameter = earmuffs
 
-    def listen(self):
+    def listen(self, earmuffs):
         self.__dispatcher.map(f'/avatar/parameters/{self.__AvatarParameter}',self.__updateAvatarParameter)
 
-    def __updateAvatarParameter(self, addr, value):
+    def __updateAvatarParameter(self, 
+                                #addr, #Address is not needed at thie time, we're not sending any data out.
+                                value):
         self.earmuffs.AvatarParameterValue = value
 
     #Server run (Blocking)

@@ -9,19 +9,18 @@ from Controllers.DataController import Settings, Earmuffs
 
 class Program:
 
-    def earmuffsRun(self, earmuffs: Earmuffs, settings: Settings, counter:int = 0):
+    def earmuffsRun(self, earmuffs: Earmuffs, settings: Settings):
         
         self.cls()
         settings.printInfo()
 
-
-        if settings.generalSettings.Logging:
-            earmuffs.printOutputs()
-        print("\nCurrent Status:\n")
-        
+        # Logging, seems to be screaming and breaking
+        # if settings.generalSettings.Logging:
+        #     earmuffs.printOutputs()
+        # print("\nCurrent Status:\n")
 
         # Inverse deadzone Range for Volume (Living range?)
-        convertedVol = self.clamp(((earmuffs.AvatarParameterValue - settings.generalSettings.VolumeCurveStart) / settings.generalSettings.VRCVolRange))
+        convertedVol = self.clamp(((earmuffs.AvatarParameterValue - settings.generalSettings.VolumeCurveStart) / settings.generalSettings.VolumeCurveRange))
 
         # VRC Volume Calculations
         vrcVol = self.volCalculate(convertedVol,settings.vrcSettings.VRCVolRange,1,settings.vrcSettings.VRCMinVolume)
@@ -32,6 +31,7 @@ class Program:
             mediaVol = self.volCalculate(convertedVol,settings.mediaSettings.MediaVolRange,-1,settings.mediaSettings.MediaMaxVolume)
 
             mediaPause = False
+
             #Pausing Functionality, currently disabled.
             # if earmuffs.settings.MediaPauseEnabled:  
             #     if earmuffs.AvatarParamaterValue >= earmuffs.settings.MediaPauseThreshhold:
@@ -44,18 +44,16 @@ class Program:
             mediaPause = False
 
         # Lowpass Calculations
-
-        # if settings.vmSettings.LowPassEnabled:
-        #     vmGain = convertedVol * -8 * settings.vmSettings.LowPassStrength
-        #     vmBass = convertedVol * 12 * settings.vmSettings.LowPassStrength
-        #     vmHighs = convertedVol * -12 * settings.vmSettings.LowPassStrength
-        # else:
-        #     vmGain=vmBass=vmHighs = 0.0
-        
+        if settings.vmSettings.LowPassEnabled:
+            vmGain = convertedVol * -8 * settings.vmSettings.LowPassStrength
+            vmBass = convertedVol * 12 * settings.vmSettings.LowPassStrength
+            vmHighs = convertedVol * -12 * settings.vmSettings.LowPassStrength
+        else:
+            vmGain=vmBass=vmHighs = 0.0
 
         self.earmuffsOutput (
                             vrcVol, mediaVol, mediaPause, 0, 
-                            #vmGain, vmBass, vmHighs, 
+                            vmGain, vmBass, vmHighs, 
                             settings
                             )
 
@@ -76,7 +74,7 @@ class Program:
                 volume.SetMasterVolume(vrcVol, None)
             
             #VRC Earmuff Controls
-                #Blank functionaly for now https://github.com/vrchat-community/osc/issues/149
+                #VRC has not exposed earmuff endpoints https://github.com/vrchat-community/osc/issues/149
 
             #Media Volume
             if  ( 
@@ -86,11 +84,11 @@ class Program:
                 ):
                     volume.SetMasterVolume(mediaVol, None)
 
-            # #Voicemeter LowPass Numbers
-            # if settings.LowPassEnabled:
-            #     settings.Gain = vmGain 
-            #     settings.EQgain1 = vmBass
-            #     settings.EQgain2 = settings.EQgain3 = vmHighs
+            #Voicemeter LowPass Numbers
+            if settings.LowPassEnabled:
+                settings.Gain = vmGain 
+                settings.EQgain1 = vmBass
+                settings.EQgain2 = settings.EQgain3 = vmHighs
 
     def clamp (self, value):
         return max(0.0, min(value, 1.0))

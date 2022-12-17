@@ -1,15 +1,15 @@
 {
         "IP": "127.0.0.1",
-        "ListeningPort": 9001,
-        "SendingPort": 9000,
+        "ListeningPort": 9021,
+        "SendingPort": 9020,
         "Logging": true,
 
         "InactiveUpdateInterval": 0.5,
         "ActiveUpdateInterval": 0.1,
         "RateOfChange": 0.1, 
 
-        "MuteCurveStart": 0.1,
-        "MuteCurveStop": 0.9,
+        "VolumeCurveStart": 0.1,
+        "VolumeCurveStop": 0.9,
         
         "VRCMinVolume": 0.5,
         "VRCMaxVolume": 1.0,
