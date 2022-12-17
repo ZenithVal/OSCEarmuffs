@@ -4,7 +4,7 @@ import os
 import time
 
 from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
-from Controllers.DataController import DefaultConfig, ConfigSettings, Leash
+from Controllers.DataController import DefaultConfig, ConfigSettings, Earmuffs
 from Controllers.PackageController import Package
 from Controllers.ThreadController import Program
 
@@ -24,9 +24,9 @@ def createDefaultConfigFile(configPath): # Creates a default config
 if __name__ == "__main__":
 
     #*************Setup*************#
-    #program = Program()
-    #program.setWindowTitle()
-    #program.cls()
+    program = Program()
+    program.setWindowTitle()
+    program.cls()
 
     """
     Steps to work on:
@@ -63,22 +63,23 @@ if __name__ == "__main__":
     #             vmr.inputs[2].eqgain2,
     #             vmr.inputs[2].eqgain3)
 
-    try:
-        # Manage data coming in
-        package = Package(earmuffs)
-        package.listen()
 
+    earmuffs = Earmuffs(settings)
+
+    # Manage data coming in
+    package = Package(earmuffs)
+    package.listen()
+
+    try:
         # Start server
         serverThread = Thread(target=package.runServer, args=(settings.IP, settings.ListeningPort))
         serverThread.start()
         time.sleep(.1)
 
-        ############# Commented out due to potential removal #############
-        # #initialize input
-        # if serverThread.is_alive():
-        #     leashes[0].Active = True
-        #     Thread(target=program.leashRun, args=(leashes[0],)).start()
-        # else: raise Exception()
+        #initialize input
+        if serverThread.is_alive():
+            Thread(target=program.earmuffsRun, args=(earmuffs,)).start()
+        else: raise Exception()
             
     except Exception as e:
         print(e)

@@ -12,8 +12,8 @@ DefaultConfig = {
         "ActiveUpdateInterval": 0.1,
         "RateOfChange": 0.1, #Maximum volume % change step per update invterval.
 
-        "MuteCurveStart": 0.1,
-        "MuteCurveStop": 0.9,
+        "VolumeCurveStart": 0.1,
+        "VolumeCurveStop": 0.9,
         
         "VRCMinVolume": 0.5,
         "VRCMaxVolume": 1.0,
@@ -22,7 +22,7 @@ DefaultConfig = {
         "LowPassStrength": 1.0,
 
         "MediaControlEnabled": True,
-        "MediaApplication": "Spotify.exe", #User can input null if they do not want it to edit spotify volume
+        "MediaApplication": "", #User can input null if they do not want it to edit spotify volume
         "MediaMinVolume": 0.0,
         "MediaMaxVolume": 1.0, #Only adjust this value if you set your media application to 100% volume (Not reccomended)
         
@@ -32,13 +32,65 @@ DefaultConfig = {
         "AvatarParameter": "Headphones_Stretch" #A float on a radial menu would also work for personal control
 }
 
-class ConfigSettings:
 
+
+class Settings:
     def __init__(self, configData):
-            self.setSettings(configData) #Set config values
-        
-    def setSettings(self, configJson):
         try:
+            self.createSettings(configData)
+        except Exception as e:
+            print('\x1b[1;31;40m' + 'Malformed config file. Loading default values.' + '\x1b[0m')
+            print(e,"was the exception\n")
+            self.createSettings()
+
+
+    def createSettings(self, configJson = None):
+        if not configJson:
+            self.generalSettings = self.GeneralSettings(configJson)
+            self.mediaSettings = self.MediaSettings(configJson)
+            self.vrcSettings= self.VRCSettings(configJson)
+        else:
+            self.generalSettings = self.GeneralSettings()
+            self.mediaSettings = self.MediaSettings()
+            self.vrcSettings= self.VRCSettings()
+
+    # #Voicemeter controls
+    # def addVoiceMeterControls(self,Gain,EQgain1,EQgain2,EQgain3):
+    #     self.Gain = Gain
+    #     self.EQgain1 = EQgain1
+    #     self.EQgain2 = EQgain2
+    #     self.EQgain3 = EQgain3  
+
+    def printInfo(self):
+        print('\x1b[1;32;40m' + 'OSCEarmuffs is Running!' + '\x1b[0m')
+
+        if self.IP == "127.0.0.1":
+            print("IP: Localhost")
+        else:  
+            print("IP: Not Localhost? Wack.")
+
+        print(f"Listening on port {self.generalSettings.ListeningPort}\n Sending on port {self.generalSettings.SendingPort}")
+
+        print("Update Intervals of {:.0f}".format(self.generalSettings.ActiveUpdateInterval*1000),"& {:.0f}".format(self.generalSettings.InactiveUpdateInterval*1000),"ms")
+        print("Maximum of {:.0f}".format(self.generalSettings.RateOfChange*100)+"% volume change each update")
+
+        print("Mute Curve Starts at {:.0f}".format(self.generalSettings.VolumeCurveStart*100)+"%")
+        print("Mute Curve Stops at {:.0f}".format(self.generalSettings.VolumeCurveStop*100)+"%")
+
+        print("VRC min Volume: {:.0f}".format(self.vrcSettings.VRCMinVolume*100)+"%")
+        print("VRC max Volume: {:.0f}".format(self.vrcSettings.VRCMaxVolume*100)+"%")
+
+        # if self.LowPassEnabled:
+        #     print("LowPass is enabled with a maximum of {:.0f}".format(self.LowPassStrength*100)+"%")
+
+        if self.mediaSettings.MediaControlEnabled:
+            print(f"Media Control is enabled: \n\t Looking for {self.mediaSettings.MediaApplication}\n\tMin volume of {self.mediaSettings.MediaMinVolume*100}%\n\tMax volume of {self.mediaSettings.MediaMaxVolume*100}%")
+            # if self.MediaPauseEnabled:
+            #     print(f"Media will pause when volume is <={self.MediaPauseThreshhold*100}% volume")
+
+class GeneralSettings:
+    def __init__(self, configJson = None):
+        if configJson is not None:
             self.IP = configJson["IP"]
             self.ListeningPort = configJson["ListeningPort"]
             self.SendingPort = configJson["SendingPort"]
@@ -48,24 +100,12 @@ class ConfigSettings:
             self.ActiveUpdateInterval = configJson["ActiveUpdateInterval"]
             self.RateOfChange = configJson["RateOfChange"]
 
-            self.MuteCurveStart = configJson["MuteCurveStart"]
-            self.MuteCurveStop = configJson["MuteCurveStop"]
+            self.VolumeCurveStart = configJson["VolumeCurveStart"]
+            self.VolumeCurveStop = configJson["VolumeCurveStop"]
+            self.VolumeCurveRange = self.VolumeCurveStop - self.VolumeCurveStart
 
-            self.VRCMinVolume = configJson["VRCMinVolume"]
-            self.VRCMaxVolume = configJson["VRCMaxVolume"]
-            self.LowPassEnabled = configJson["LowPassEnabled"]
-            self.LowPassStrength = configJson["LowPassStrength"]
-
-            self.MediaControlEnabled = configJson["MediaControlEnabled"]
-            self.MediaApplication = configJson["MediaApplication"]
-            self.MediaMinVolume = configJson["MediaMinVolume"]
-            self.MediaMaxVolume = configJson["MediaMaxVolume"]
-            self.MediaPauseEnabled = configJson["MediaPauseEnbabled"]
-            self.MediaPauseThreshhold = configJson["MediaPauseThreshhold"]
             self.AvatarParameter = configJson["AvatarParameter"]
-        except Exception as e: 
-            print('\x1b[1;31;40m' + 'Malformed config file. Loading default values.' + '\x1b[0m')
-            print(e,"was the exception\n")
+        else:
             self.IP = DefaultConfig["IP"]
             self.ListeningPort = DefaultConfig["ListeningPort"]
             self.SendingPort = DefaultConfig["SendingPort"]
@@ -75,64 +115,61 @@ class ConfigSettings:
             self.ActiveUpdateInterval = DefaultConfig["ActiveUpdateInterval"]
             self.RateOfChange = DefaultConfig["RateOfChange"]
 
-            self.MuteCurveStart = DefaultConfig["MuteCurveStart"]
-            self.MuteCurveStop = DefaultConfig["MuteCurveStop"]
+            self.VolumeCurveStart = DefaultConfig["VolumeCurveStart"]
+            self.VolumeCurveStop = DefaultConfig["VolumeCurveStop"]
+            self.VolumeCurveRange = self.VolumeCurveStop - self.VolumeCurveStart
 
-            self.VRCMinVolume = DefaultConfig["VRCMinVolume"]
-            self.VRCMaxVolume = DefaultConfig["VRCMaxVolume"]
-            self.LowPassEnabled = DefaultConfig["LowPassEnabled"]
-            self.LowPassStrength = DefaultConfig["LowPassStrength"]
+            self.AvatarParameter = DefaultConfig["AvatarParameter"]
 
+class MediaSettings:
+    def __init__(self, configJson = None):
+        if configJson is not None:
+            self.MediaControlEnabled = configJson["MediaControlEnabled"]
+            self.MediaApplication = configJson["MediaApplication"]
+
+            self.MediaMinVolume = configJson["MediaMinVolume"]
+            self.MediaMaxVolume = configJson["MediaMaxVolume"]
+            self.MediaVolRange = self.MediaMaxVolume - self.MediaMinVolume
+                
+            #Pausing doesnt fucking work lmao
+            # self.MediaPauseEnabled = configJson["MediaPauseEnbabled"]
+            # self.MediaPauseThreshhold = configJson["MediaPauseThreshhold"]
+        else:
             self.MediaControlEnabled = DefaultConfig["MediaControlEnabled"]
             self.MediaApplication = DefaultConfig["MediaApplication"]
+
             self.MediaMinVolume = DefaultConfig["MediaMinVolume"]
             self.MediaMaxVolume = DefaultConfig["MediaMaxVolume"]
-            self.MediaPauseEnabled = DefaultConfig["MediaPauseEnbabled"]
-            self.MediaPauseThreshhold = DefaultConfig["MediaPauseThreshhold"]
-            self.AvatarParameter = DefaultConfig["AvatarParameter"]
-            time.sleep(3)
+            self.MediaVolRange = self.MediaMaxVolume - self.MediaMinVolume
 
-        #Voicemeter controls
-    def addVoiceMeterControls(self,Gain,EQgain1,EQgain2,EQgain3):
-        self.Gain = Gain
-        self.EQgain1 = EQgain1
-        self.EQgain2 = EQgain2
-        self.EQgain3 = EQgain3     
+class VRCSettings:
+    def __init__(self, configJson = None):
+        if configJson is not None:
+            self.VRCMinVolume = configJson["VRCMinVolume"]
+            self.VRCMaxVolume = configJson["VRCMaxVolume"]
+            self.VRCVolRange = self.VRCMaxVolume - self.VRCMinVolume
+        else:
+            self.VRCMinVolume = DefaultConfig["VRCMinVolume"]
+            self.VRCMaxVolume = DefaultConfig["VRCMaxVolume"]
+            self.VRCVolRange = self.VRCMaxVolume - self.VRCMinVolume
 
-    def printInfo(self):        
-        print('\x1b[1;32;40m' + 'OSCEarmuffs is Running!' + '\x1b[0m')
 
-        if self.IP == "127.0.0.1":
-            print("IP: Localhost")
-        else:  
-            print("IP: Not Localhost? Wack.")
-
-        print(f"Listening on port {self.ListeningPort}\n Sending on port {self.SendingPort}")
-
-        print("Update Intervals of {:.0f}".format(self.ActiveUpdateInterval*1000),"& {:.0f}".format(self.InactiveUpdateInterval*1000),"ms")
-        print("Maximum of {:.0f}".format(self.RateOfChange*100)+"% volume change each update")
-
-        print("Mute Curve Starts at {:.0f}".format(self.MuteCurveStart*100)+"%")
-        print("Mute Curve Stops at {:.0f}".format(self.MuteCurveStop*100)+"%")
-
-        print("VRC min Volume: {:.0f}".format(self.VRCMinVolume*100)+"%")
-        print("VRC max Volume: {:.0f}".format(self.VRCMaxVolume*100)+"%")
-
-        if self.LowPassEnabled:
-            print("LowPass is enabled with a maximum of {:.0f}".format(self.LowPassStrength*100)+"%")
-
-        if self.MediaControlEnabled:
-            print(f"Media Control is enabled: \n\t Looking for {self.MediaApplication}\n\tMin volume of {self.MediaMinVolume*100}%\n\tMax volume of {self.MediaMaxVolume*100}%")
-            if self.MediaPauseEnabled:
-                print(f"Media will pause when volume is <={self.MediaPauseThreshhold*100}% volume")
+# class VMSettings:
+#     def __init__(self, configJson = None):
+#         if configJson is not None:
+#             self.LowPassEnabled = configJson["LowPassEnabled"]
+#             self.LowPassStrength = configJson["LowPassStrength"]
 
 class Earmuffs:
 
-    def __init__(self, settings: ConfigSettings):
-
-        self.settings = settings
+    def __init__(self):
         self.AvatarParameterValue: float = None,
-        self.VRChatVolume: float = 0
+
+        self.VRChatVolume: float = None
+        self.VRChatTargetVolume: float = None
+
+        self.MediaVolume: float = None
+        self.MediaTargetVolume: float = None
 
 
         # if self.LowPassEnabled:
