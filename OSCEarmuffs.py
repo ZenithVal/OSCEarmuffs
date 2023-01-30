@@ -3,7 +3,7 @@ import json
 import os
 import time
 
-from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
+
 from Controllers.DataController import DefaultConfig, Settings, Earmuffs
 from Controllers.PackageController import Package
 from Controllers.ThreadController import Program
@@ -38,7 +38,6 @@ if __name__ == "__main__":
     ? - Add voicemeter setup
     """
     
-
     # Test if Config file exists. Create the default if it does not.
     configRelativePath = "./config.json"
     if not os.path.exists(configRelativePath):
@@ -51,18 +50,18 @@ if __name__ == "__main__":
     settings = Settings(configData) # Get settings from config file
 
     ############# Temporarily Commented to focus on main function #############
-    # VoiceMeter setup
-    if settings.vmrSettings.LowPassEnabled:
-        import voicemeeter
-        voicemeeter.launch("basic")
-        with voicemeeter.remote("Basic") as vmr:
-            settings.addVoiceMeterControls(
-                vmr.inputs[2].gain,
-                vmr.inputs[2].eqgain1,
-                vmr.inputs[2].eqgain2,
-                vmr.inputs[2].eqgain3)
+    # # VoiceMeter setup
+    # if settings.vmrSettings.LowPassEnabled:
+    #     import voicemeeter
+    #     voicemeeter.launch("basic")
+    #     with voicemeeter.remote("Basic") as vmr:
+    #         settings.addVoiceMeterControls(
+    #             vmr.inputs[2].gain,
+    #             vmr.inputs[2].eqgain1,
+    #             vmr.inputs[2].eqgain2,
+    #             vmr.inputs[2].eqgain3)
 
-    earmuffs = Earmuffs
+    earmuffs = Earmuffs(settings)
 
     # Manage data coming in
     package = Package(earmuffs)
@@ -74,11 +73,12 @@ if __name__ == "__main__":
         serverThread.start()
         time.sleep(.1)
 
-        #initialize input
-        if serverThread.is_alive():
-            Thread(target=program.earmuffsRun, args=(earmuffs,settings)).start()
-        else: 
-            print("IT'S ALL FUCKING DYING AHHHHHHHH")
+        if serverThread.is_alive(): #Server is reading
+            #Start program
+            Thread(target=program.earmuffsUpdate, args=(earmuffs,settings)).start()
+            #Thread(target=program.earmuffsOutput, args=(earmuffs,settings)).start()
+        else: #Server failed to read
+            print("Server failed to read")
             raise Exception()
             
     except Exception as e:
