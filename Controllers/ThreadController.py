@@ -1,96 +1,147 @@
 from pythonosc.udp_client import SimpleUDPClient
-from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
-from threading import Thread
+#from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
+from threading import Thread, Lock
 import time
-import os
+import os #Windows dependancy
 import ctypes #Required for colored error messages.
 
 from Controllers.DataController import Settings, Earmuffs
 
 class Program:
 
-    def earmuffsRun(self, earmuffs: Earmuffs, settings: Settings):
+    __statelock = Lock()
+
+    # __Active = False
+
+    # def __setActive(self):
+    #     Program.__Active = True
+
+    # def __setInactive(self):
+    #     Program.__Active = False
+    
+    # def isRunning(self):
+    #     return self.__Active
+
+    def volCalculate(self, convertedVol, range, multi,translate):
+        return ((convertedVol*range)*multi)+translate
+
+    def programThread(self, earmuffs: Earmuffs, settings: Settings, active = False):
+        timeDelay = None
+        if active:
+            timeDelay = settings.generalSettings.ActiveUpdateInterval
+        else:
+            timeDelay = settings.generalSettings.InactiveUpdateInterval
+
+        time.sleep(timeDelay)
+        Thread(target=self.earmuffsUpdate, args=(earmuffs,settings)).start()
+
+    def earmuffsUpdate(self, earmuffs: Earmuffs, settings: Settings):
         
+        '''Display'''
         self.cls()
         settings.printInfo()
 
-        # Logging, seems to be screaming and breaking
-        # if settings.generalSettings.Logging:
-        #     earmuffs.printOutputs()
-        # print("\nCurrent Status:\n")
+        '''State Checks'''
+        ### TEST VALUE ###
+        earmuffs.AvatarParameterValue = 0.5
 
+        endThread = False
+        self.__statelock.acquire()
+        if earmuffs.AvatarParameterValue is None:
+            endThread = True
+            self.programThread(earmuffs, settings, False)
+        self.__statelock.release()
+
+        if endThread: return
+
+        self.__statelock.acquire()
+        if earmuffs.VRChatVolume == earmuffs.VRChatTargetVolume:
+            endThread = True
+            self.programThread(earmuffs, settings, False)
+        self.__statelock.release()
+
+        if endThread: return
+
+        '''Calculations'''
+
+        self.__statelock.acquire()
+        #avatarParamValue = earmuffs.AvatarParameterValue
         # Inverse deadzone Range for Volume (Living range?)
         convertedVol = self.clamp(((earmuffs.AvatarParameterValue - settings.generalSettings.VolumeCurveStart) / settings.generalSettings.VolumeCurveRange))
+        self.__statelock.release()
+        
+        # convertedVol = self.clamp(((avatarParamValue - settings.generalSettings.VolumeCurveStart) / settings.generalSettings.VolumeCurveRange))
 
         # VRC Volume Calculations
-        vrcVol = self.volCalculate(convertedVol,settings.vrcSettings.VRCVolRange,1,settings.vrcSettings.VRCMinVolume)
-
+        vrcVol = self.volCalculate(convertedVol, settings.vrcSettings.VRCVolRange, 1, settings.vrcSettings.VRCMinVolume)
 
         # Media Volume Calculations
         if settings.mediaSettings.MediaControlEnabled:
-            mediaVol = self.volCalculate(convertedVol,settings.mediaSettings.MediaVolRange,-1,settings.mediaSettings.MediaMaxVolume)
-
-            mediaPause = False
-
-            #Pausing Functionality, currently disabled.
-            # if earmuffs.settings.MediaPauseEnabled:  
-            #     if earmuffs.AvatarParamaterValue >= earmuffs.settings.MediaPauseThreshhold:
-            #         mediaPause = True
-            #     else:
-            #         mediaPause = False
-        
+            mediaVol = self.volCalculate(convertedVol, settings.mediaSettings.MediaVolRange,-1, settings.mediaSettings.MediaMaxVolume)
         else:
             mediaVol = 1.0
-            mediaPause = False
+
+        self.__statelock.acquire()
+        earmuffs.MediaTargetVolume = mediaVol
+        earmuffs.VRChatTargetVolume = vrcVol
+        self.__statelock.release()
+
+        self.programThread(earmuffs, settings, True)
 
         # Lowpass Calculations
-        if settings.vmSettings.LowPassEnabled:
-            vmGain = convertedVol * -8 * settings.vmSettings.LowPassStrength
-            vmBass = convertedVol * 12 * settings.vmSettings.LowPassStrength
-            vmHighs = convertedVol * -12 * settings.vmSettings.LowPassStrength
-        else:
-            vmGain=vmBass=vmHighs = 0.0
+        # if settings.vmSettings.LowPassEnabled:
+        #     vmGain = convertedVol * -8 * settings.vmSettings.LowPassStrength
+        #     vmBass = convertedVol * 12 * settings.vmSettings.LowPassStrength
+        #     vmHighs = convertedVol * -12 * settings.vmSettings.LowPassStrength
+        # else:
+        #     vmGain=vmBass=vmHighs = 0.0
 
-        self.earmuffsOutput (
-                            vrcVol, mediaVol, mediaPause, 0, 
-                            vmGain, vmBass, vmHighs, 
-                            settings
-                            )
+    # def earmuffsOutput(earmuffs: Earmuffs, settings: Settings):
 
-    def volCalculate(convertedVol, range, multi,translate):
-        return ((convertedVol*range)*multi)+translate
+    #     '''State Checks'''
+    #     endThread = False
+    #     self.__statelock.acquire()
+    #     if earmuffs.AvatarParameterValue is None:
+    #         endThread = True
+    #         self.programThread(earmuffs, settings, False)
+    #     self.__statelock.release()
 
-    def earmuffsOutput  (
-                        self, vrcVol: float, mediaVol: float, mediaPause: bool, 
-                        #vmGain: float, vmBass: float, vmHighs: float, 
-                        settings: Settings
-                        ):
+    #     if endThread: return
 
-        sessions = AudioUtilities.GetAllSessions()
-        for session in sessions:
-            volume = session._ctl.QueryInterface(ISimpleAudioVolume)
-            #VRC Volume
-            if session.Process and session.Process.name() == "VRChat.exe":
-                volume.SetMasterVolume(vrcVol, None)
+    #     self.__statelock.acquire()
+    #     if earmuffs.VRChatVolume == earmuffs.VRChatTargetVolume:
+    #         endThread = True
+    #         self.programThread(earmuffs, settings, False)
+    #     self.__statelock.release()
+
+    #     if endThread: return
+
+    #     sessions = AudioUtilities.GetAllSessions()
+    #     for session in sessions:
+    #         volume = session._ctl.QueryInterface(ISimpleAudioVolume)
+    #         #VRC Volume
+    #         if session.Process and session.Process.name() == "VRChat.exe":
+    #             volume.SetMasterVolume(vrcVol, None)
+    #         else:
+    #             print("VRC application not found")
             
-            #VRC Earmuff Controls
-                #VRC has not exposed earmuff endpoints https://github.com/vrchat-community/osc/issues/149
+    #         #VRC Earmuff Controls
+    #             #VRC has not exposed earmuff endpoints https://github.com/vrchat-community/osc/issues/149
 
-            #Media Volume
-            if  ( 
-                settings.MediaControlEnabled 
-                and session.Process 
-                and session.Process.name() == settings.MediaApplication 
-                ):
-                    volume.SetMasterVolume(mediaVol, None)
+    #         #Media Volume
+    #         if  ( 
+    #             settings.MediaControlEnabled 
+    #             and (session.Process and session.Process.name() == settings.MediaApplication)
+    #             ):
+    #                 volume.SetMasterVolume(mediaVol, None)
 
-            #Voicemeter LowPass Numbers
-            if settings.LowPassEnabled:
-                settings.Gain = vmGain 
-                settings.EQgain1 = vmBass
-                settings.EQgain2 = settings.EQgain3 = vmHighs
+    #         #Voicemeter LowPass Numbers
+    #         # if settings.LowPassEnabled:
+    #         #     settings.Gain = vmGain 
+    #         #     settings.EQgain1 = vmBass
+    #         #     settings.EQgain2 = settings.EQgain3 = vmHighs
 
-    def clamp (self, value):
+    def clamp (self, value): #Basic 0.0 - 1.0 clamp
         return max(0.0, min(value, 1.0))
 
     def cls(self): # Console Clear

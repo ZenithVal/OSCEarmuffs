@@ -47,12 +47,12 @@ class Settings:
             self.generalSettings = GeneralSettings(configJson)
             self.mediaSettings = MediaSettings(configJson)
             self.vrcSettings= VRCSettings(configJson)
-            self.vmrSettings= VMRSettings(configJson)
+            # self.vmrSettings= VMRSettings(configJson)
         else:
             self.generalSettings = GeneralSettings()
             self.mediaSettings = MediaSettings()
             self.vrcSettings= VRCSettings()
-            self.vmrSettings= VMRSettings()
+            # self.vmrSettings= VMRSettings()
 
     #Voicemeter controls
     def addVoiceMeterControls(self,Gain,EQgain1,EQgain2,EQgain3):
@@ -63,6 +63,7 @@ class Settings:
 
     def printInfo(self):
         print('\x1b[1;32;40m' + 'OSCEarmuffs is Running!' + '\x1b[0m')
+        print('\x1b[1;32;40m' + 'Ratio + ur mom' + '\x1b[0m')
 
         if self.generalSettings.IP == "127.0.0.1":
             print("IP: Localhost")
@@ -80,11 +81,11 @@ class Settings:
         print("VRC min Volume: {:.0f}".format(self.vrcSettings.VRCMinVolume*100)+"%")
         print("VRC max Volume: {:.0f}".format(self.vrcSettings.VRCMaxVolume*100)+"%")
 
-        if self.vmrSettings.LowPassEnabled:
-             print("LowPass is enabled with a maximum of {:.0f}".format(self.LowPassStrength*100)+"%")
+        # if self.vmrSettings.LowPassEnabled:
+        #      print("LowPass is enabled with a maximum of {:.0f}".format(self.LowPassStrength*100)+"%")
 
         if self.mediaSettings.MediaControlEnabled:
-            print(f"Media Control is enabled: \n\t Looking for {self.mediaSettings.MediaApplication}\n\tMin volume of {self.mediaSettings.MediaMinVolume*100}%\n\tMax volume of {self.mediaSettings.MediaMaxVolume*100}%")
+            print(f"Media Control is enabled:\n\tLooking for {self.mediaSettings.MediaApplication}\n\tMin volume of {self.mediaSettings.MediaMinVolume*100}%\n\tMax volume of {self.mediaSettings.MediaMaxVolume*100}%")
             # if self.MediaPauseEnabled:
             #     print(f"Media will pause when volume is <={self.MediaPauseThreshhold*100}% volume")
 
@@ -153,34 +154,37 @@ class VRCSettings:
             self.VRCMaxVolume = DefaultConfig["VRCMaxVolume"]
             self.VRCVolRange = self.VRCMaxVolume - self.VRCMinVolume
 
-class VMRSettings:
-    def __init__(self, configJson = None):
-        if configJson is not None:
-            self.LowPassEnabled = configJson["LowPassEnabled"]
-            self.LowPassStrength = configJson["LowPassStrength"]
-        else:
-            self.LowPassEnabled = DefaultConfig["LowPassEnabled"]
-            self.LowPassStrength = DefaultConfig["LowPassStrength"]
+# class VMRSettings:
+#     def __init__(self, configJson = None):
+#         if configJson is not None:
+#             self.LowPassEnabled = configJson["LowPassEnabled"]
+#             self.LowPassStrength = configJson["LowPassStrength"]
+#         else:
+#             self.LowPassEnabled = DefaultConfig["LowPassEnabled"]
+#             self.LowPassStrength = DefaultConfig["LowPassStrength"]
 
 class Earmuffs:
 
     def __init__(self, settings: Settings):
-
-        self.settings = settings
-
-        self.AvatarParameterValue: float = None,
+        
+        self.AvatarParameter = settings.generalSettings.AvatarParameter
+        
+        self.AvatarParameterValue: float = None
         
         self.VRChatVolume: float = None
         self.VRChatTargetVolume: float = None
 
+        self.MediaControlEnabled = settings.mediaSettings.MediaControlEnabled
+        self.MediaApplication = settings.mediaSettings.MediaApplication
+        
         self.MediaVolume: float = None
         self.MediaTargetVolume: float = None
 
-        if self.LowPassEnabled:
-            self.LowPassEffect: float = 0
+        # if settings.generalSettings.LowPassEnabled:
+        #     self.LowPassEffect: float = 0
 
-        if self.MediaEnabled:
-            self.MediaVolume: float = 0
+        # if settings.generalSettings.MediaEnabled:
+        #     self.MediaVolume: float = 0
             
             # Disabled
             # if self.MediaPauseEnabled:
@@ -188,20 +192,15 @@ class Earmuffs:
 
     def printOutputs(self):
         
-        print("Were in print output woah.")
+        print("Were in print output")
 
-
-        # #VRC Readout
-        # print(f"VRChat.exe: {self.VRChatVolume}%")
+        #VRC Readout
+        print(f"VRChat.exe: {self.VRChatVolume}%")
         
-        # #Media readout
-        # if self.MediaEnabled:
-        #     print(f"{self.MediaApplication}: {self.MediaVolume}%")
-            
-        #     # unused pausing readout
-        #     # if self.MediaPauseEnabled:
-        #     #     print(f"Media Paused: {self.MediaPause}")
+        #Media readout
+        if self.MediaControlEnabled:
+            print(f"{self.MediaApplication}: {self.MediaVolume}%")
 
-        # #Lowpass readout
+        #Lowpass readout
         # if self.LowPassEnabled:
         #     print(f"Lowpass: {self.LowPassEffect}%")

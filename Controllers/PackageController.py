@@ -10,19 +10,22 @@ class Package:
 
     def __init__(self, earmuffs):
         self.__dispatcher = Dispatcher() # Recieves information from vrc client
+        self.__AvatarParameter = earmuffs.AvatarParameter # Stores the Avatar Parameter name as a reference
 
-        self.earmuffs = earmuffs
-        self.__AvatarParameter = earmuffs
+        self.__earmuffs = earmuffs
 
-    def listen(self, earmuffs):
+    # Uses oscServer to "listen" for new data. (Blocking method)
+    def listen(self):
         self.__dispatcher.map(f'/avatar/parameters/{self.__AvatarParameter}',self.__updateAvatarParameter)
 
-    def __updateAvatarParameter(self, 
-                                #addr, #Address is not needed at thie time, we're not sending any data out.
-                                value):
-        self.earmuffs.AvatarParameterValue = value
+    #NOTE: addr is an output of Dispatcher. It must be included even if not used. Otherwise,
+    #   the address will be placed in the "value" parameter.
+    def __updateAvatarParameter(self, addr, value):
+        #Assign value
+        self.__earmuffs.AvatarParameterValue = value
 
-    #Server run (Blocking)
+    # Server run (Blocking method): Reduces rate at which data is pushed by blocking
+    # Reference => https://github.com/attwad/python-osc
     def runServer(self, IP, Port):
         try:
             osc_server.BlockingOSCUDPServer((IP, Port), self.__dispatcher).serve_forever()
