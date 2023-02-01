@@ -106,4 +106,4 @@ tbd
 
 # Credits
 
-- @ALeonic is the actaul coder brain putting together my patchwork disfunctional code/ideas.
+- @ALeonic is an actaul competent coder helping put together my patchwork & disfunctional code.
