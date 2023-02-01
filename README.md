@@ -6,18 +6,18 @@ You can bind an avatar parameter to VRC's Volume & a media application of choice
 <br>
 
 The tool is not in a functional state yet.
-~~ ## Options for running OSCEarmuffs
-*OSCearmuffs relies on windows functions, so I don't believe it's compatible with linux*
+## ~~Options for running OSCEarmuffs~~
+*~~OSCearmuffs relies on windows functions, so I don't believe it's compatible with linux~~*
 
-1. **Via an executable**
-   - Download latest zip [from releases](https://github.com/ZenithVal/OSCEarmuffs/releases)
-   - Extract wherever.
-   - Edit Config.json
-   - Run Executable
-2. **From the source**
-   - Clone the github
-   - Run `pip install -r requirements.txt` in the directory to install libraries
-   - Run the python script##Avatar Setup~~
+1. **~~Via an executable~~**
+   - ~~Download latest zip [from releases](https://github.com/ZenithVal/OSCEarmuffs/releases)~~
+   - ~~Extract wherever.~~
+   - ~~Edit Config.json~~
+   - ~~Run Executable~~
+2. **~~From the source~~**
+   - ~~Clone the github~~
+   - ~~Run `pip install -r requirements.txt` in the directory to install libraries~~
+   - ~~Run the python script##Avatar Setup~~
 
 <br>
 
